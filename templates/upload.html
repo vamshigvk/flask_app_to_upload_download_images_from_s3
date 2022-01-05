@@ -1,0 +1,42 @@
+<!doctype html>
+<title>Check Details Extractor</title>
+<style>
+	.content {
+	  max-width: 500px;
+	  margin: auto;
+	}
+</style>
+<body>
+	<div class="content">
+	
+<h2>Upload Cheque Image to extract details</h2>
+<p>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		<ul>
+		{% for message in messages %}
+		  <li>{{ message }}</li>
+		{% endfor %}
+		</ul>
+	  {% endif %}
+	{% endwith %}
+</p>
+{% if filename %}
+	<br><br>
+	<b>Image Name:</b> {{filename}}
+	<div>
+		<img src="{{ url_for('display_image', filename=filename) }}" alt="file failed to load"  width="500" height="600">
+	</div>
+{% endif %}
+<form method="post" action="/" enctype="multipart/form-data">
+    <dl>
+		<p>
+			<input type="file" name="file" autocomplete="off" required>
+		</p>
+    </dl>
+    <p>
+		<input type="submit" value="Submit">
+	</p>
+</form>
+</div>
+</body>
