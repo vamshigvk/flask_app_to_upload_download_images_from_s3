@@ -1,13 +1,13 @@
-import os, time
+import os, time, json
 from app import app
 import urllib.request
-from flask import Flask, flash, request, redirect, url_for, render_template
+from flask import Flask, flash, request, redirect, url_for, render_template, jsonify
 from werkzeug.utils import secure_filename
 import boto3
 
 s3 = boto3.client('s3',
-                    aws_access_key_id='YOUR_KEY_ID' ,
-                    aws_secret_access_key= 'YOUR_SECRET_ACCESS_KEY' #,aws_session_token=
+                    aws_access_key_id='keyid' ,
+                    aws_secret_access_key= 'secretkey' #,aws_session_token=
                      )
 
 BUCKET_NAME='data.science.python.projects'
@@ -35,9 +35,14 @@ def upload_image():
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		s3.upload_file(Bucket = BUCKET_NAME, Filename='static/uploads/'+filename, Key = 'textract/'+filename)
-		#print('upload_image filename: ' + filename)
+		print('upload_image filename: ' + filename)
 		flash('Image successfully uploaded and displayed below')
-		time.sleep(0.02)
+		time.sleep(5)
+		filename_json = filename.split('.')[0] +'.json'
+		print('jsonfile name is',filename_json)
+
+		s3.download_file(BUCKET_NAME, 'object_json/'+filename_json, 'static/downloads/'+filename_json)
+
 		return render_template('upload.html', filename=filename)
 	else:
 		flash('Allowed image types are -> png, jpg, jpeg, gif')
@@ -46,7 +51,11 @@ def upload_image():
 @app.route('/display/<filename>')
 def display_image(filename):
 	#print('display_image filename: ' + filename)
-	return redirect(url_for('static', filename='uploads/' + filename), code=301)
+    with open('static/downloads/ocr3.json', 'r') as myfile:
+        data = myfile.read()
+
+    return redirect(url_for('static', filename='uploads/' + filename, jsonfile = json.dumps(data)), code=301)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
