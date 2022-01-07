@@ -53,7 +53,9 @@
 	<br>  <br>
 	<b>Image Name:</b> {{filename}}
 	<div>
-		<img src="{{ url_for('display_image', filename=filename, jsonfile = jsonfile) }}" alt="file failed to load"  width="1000" height="500">
+		<img src="static/uploads/{{filename}}" alt="file failed to load"  width="1000" height="500">
+
+		{{data}}
 	</div>
 {% endif %}
 <form method="post" action="/" enctype="multipart/form-data">
