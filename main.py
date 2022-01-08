@@ -5,8 +5,8 @@ from werkzeug.utils import secure_filename
 import boto3
 
 s3 = boto3.client('s3',
-                    aws_access_key_id='AKIAWXYSJZ5ZEVBZSC46' ,
-                    aws_secret_access_key= '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' #,aws_session_token=
+                    aws_access_key_id=':)' ,
+                    aws_secret_access_key= ';)' #,aws_session_token=
                      )
 
 #BUCKET_NAME='data.science.python.projects'
