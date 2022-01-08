@@ -2,7 +2,7 @@
 <title>Check Details Extractor</title>
 <style>
 	.content {
-	  max-width: 700px;
+	  max-width: 950px;
 	  margin: auto;
 	}
 </style>
@@ -50,12 +50,17 @@
 	{% endwith %}
 </p>
 {% if filename %}
-	<br>  <br>
+	<br>
 	<b>Image Name:</b> {{filename}}
 	<div>
 		<img src="static/uploads/{{filename}}" alt="file failed to load"  width="1000" height="500">
 
-		{{data}}
+	
+	</div>
+	<div>
+	
+		<pre> {{data}} </pre>
+	
 	</div>
 {% endif %}
 <form method="post" action="/" enctype="multipart/form-data">
@@ -65,7 +70,7 @@
     <p> <input type="submit" name="submit" value="Submit" class="btn btn-success" > </p>
 </form>
 
-
-
 </div>
+
+
 </body>
