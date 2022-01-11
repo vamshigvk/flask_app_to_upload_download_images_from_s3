@@ -1,6 +1,6 @@
 import os, time
 from app import app
-from flask import flash, request, redirect, render_template
+from flask import flash, request, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
 import boto3
 from botocore.exceptions import ClientError
@@ -38,21 +38,21 @@ def upload_image():
         s3.upload_file(Bucket = SOURCE_BUCKET_NAME, Filename='static/uploads/'+filename, Key = filename)
         print('upload_image filename: ' + filename)
         flash('Image successfully uploaded and displayed below')
-        #time.sleep(8)
 
         try:
             #checking if the output file is ready on S3
             waiter = s3.get_waiter('object_exists')
             response_filename = filename+'-analyzeexpenseresponse.txt'
-            waiter.wait(Bucket=DESTINATION_BUCKET_NAME, Key = response_filename, WaiterConfig={'Delay': 2, 'MaxAttempts': 5})
+            waiter.wait(Bucket=DESTINATION_BUCKET_NAME, Key = response_filename, WaiterConfig={'Delay': 3, 'MaxAttempts': 10})
             print('Object exists: ' + DESTINATION_BUCKET_NAME +'/'+response_filename)
             #downloading the output file to temp folder on local machine
             s3.download_file(DESTINATION_BUCKET_NAME, response_filename, 'static/downloads/'+response_filename)
         except ClientError as e:
             raise Exception( "boto3 client error in use_waiters_check_object_exists: " + e.__str__())
         except Exception as e:
-            raise Exception( "Unexpected error in use_waiters_check_object_exists: " + e.__str__())
-            return redirect(request.url)
+            #flash('Sorry, Failed to extract details, please try again.')
+            #return redirect(request.url)
+            return render_template("upload.html", filename=filename, data="Sorry, couldn't extact details from Image, please try again.")
 
         #reading output file from temp folder to display on webpage
         with open('static/downloads/'+response_filename, 'r', encoding="utf8") as myfile:
@@ -62,6 +62,10 @@ def upload_image():
         flash('Allowed image types are -> png, jpg, jpeg, gif')
         return redirect(request.url)
 
+@app.route('/static/uploads/')
+def do_foo():
+    filename = request.args['filename']
+    return render_template("upload.html", filename=filename, data="Sorry, couldn't extact, try again.")
 
 if __name__ == "__main__":
     try:
