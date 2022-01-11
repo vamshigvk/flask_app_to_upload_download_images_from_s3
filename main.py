@@ -62,11 +62,6 @@ def upload_image():
         flash('Allowed image types are -> png, jpg, jpeg, gif')
         return redirect(request.url)
 
-@app.route('/static/uploads/')
-def do_foo():
-    filename = request.args['filename']
-    return render_template("upload.html", filename=filename, data="Sorry, couldn't extact, try again.")
-
 if __name__ == "__main__":
     try:
         app.run(host='0.0.0.0', port=5000)
