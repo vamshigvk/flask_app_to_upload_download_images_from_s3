@@ -3,11 +3,9 @@ from app import app
 from flask import flash, request, redirect, render_template
 from werkzeug.utils import secure_filename
 import boto3
+from botocore.exceptions import ClientError
 
-s3 = boto3.client('s3',
-                    aws_access_key_id='AKIAWXYSJZ5ZEVBZSC46' ,
-                    aws_secret_access_key= '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' #,aws_session_token=
-                     )
+s3 = boto3.client('s3')
 
 #BUCKET_NAME='data.science.python.projects'
 SOURCE_BUCKET_NAME='textract-analyzexpense-sourcebucket-1x7nf48xmbtqp'
@@ -34,27 +32,29 @@ def upload_image():
         return redirect(request.url)
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
+        #saving a file to temp directory on local machine
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        #s3.upload_file(Bucket = SOURCE_BUCKET_NAME, Filename='static/uploads/'+filename, Key = 'textract/'+filename)
+        #uploading file to S3
         s3.upload_file(Bucket = SOURCE_BUCKET_NAME, Filename='static/uploads/'+filename, Key = filename)
         print('upload_image filename: ' + filename)
         flash('Image successfully uploaded and displayed below')
-        time.sleep(8)
-        filename_json = filename.split('.')[0] +'.json'
+        #time.sleep(8)
 
         try:
-            
-            #print('jsonfile name is',filename_json)
+            #checking if the output file is ready on S3
+            waiter = s3.get_waiter('object_exists')
             response_filename = filename+'-analyzeexpenseresponse.txt'
-            print('expense text filename is',response_filename)
-
-            #s3.download_file(SOURCE_BUCKET_NAME, 'object_json/'+filename_json, 'static/downloads/'+filename_json)            
+            waiter.wait(Bucket=DESTINATION_BUCKET_NAME, Key = response_filename, WaiterConfig={'Delay': 2, 'MaxAttempts': 5})
+            print('Object exists: ' + DESTINATION_BUCKET_NAME +'/'+response_filename)
+            #downloading the output file to temp folder on local machine
             s3.download_file(DESTINATION_BUCKET_NAME, response_filename, 'static/downloads/'+response_filename)
-        except:
-            flash('Failed to load extracted file, try again')
+        except ClientError as e:
+            raise Exception( "boto3 client error in use_waiters_check_object_exists: " + e.__str__())
+        except Exception as e:
+            raise Exception( "Unexpected error in use_waiters_check_object_exists: " + e.__str__())
             return redirect(request.url)
-        filename_json = filename.split('.')[0] +'.json'
-        #with open('static/downloads/'+filename_json, 'r') as myfile:
+
+        #reading output file from temp folder to display on webpage
         with open('static/downloads/'+response_filename, 'r', encoding="utf8") as myfile:
             data = myfile.read()
         return render_template('upload.html', filename=filename, data=data)
@@ -64,4 +64,7 @@ def upload_image():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    try:
+        app.run(host='0.0.0.0', port=5000)
+    except Exception:
+        app.run(host='localhost', port=5000)
