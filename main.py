@@ -4,6 +4,9 @@ from flask import flash, request, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
 import boto3
 from botocore.exceptions import ClientError
+#from image_rotation import rotate
+from rotation import generalPipeline
+
 
 s3 = boto3.client('s3')
 
@@ -57,6 +60,14 @@ def upload_image():
         #reading output file from temp folder to display on webpage
         with open('static/downloads/'+response_filename, 'r', encoding="utf8") as myfile:
             data = myfile.read()
+            print('data is:', data[:100])
+        #rotating image into correct angle
+        #rotate('static/uploads/'+filename)
+        try:
+            generalPipeline('static/uploads/'+filename)
+        except Exception as f:
+            print('exception occurred in rotation: ',f)
+            flash('Sorry, Failed to rotate image, please try again.')
         return render_template('upload.html', filename=filename, data=data)
     else:
         flash('Allowed image types are -> png, jpg, jpeg, gif')
