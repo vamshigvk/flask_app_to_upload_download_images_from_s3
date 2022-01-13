@@ -1,4 +1,4 @@
-import os, time
+import os, time, io
 from app import app
 from flask import flash, request, redirect, render_template, url_for
 from werkzeug.utils import secure_filename
@@ -58,7 +58,7 @@ def upload_image():
             return render_template("upload.html", filename=filename, data="Sorry, couldn't extact details from Image, please try again.")
 
         #reading output file from temp folder to display on webpage
-        with open('static/downloads/'+response_filename, 'r', encoding="utf8") as myfile:
+        with io.open('static/downloads/'+response_filename, 'r', encoding="utf8") as myfile:
             data = myfile.read()
             print('data is:', data[:100])
         #rotating image into correct angle

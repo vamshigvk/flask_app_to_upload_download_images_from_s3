@@ -1,12 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 from skimage.transform import rotate
 from skimage.transform import (hough_line, hough_line_peaks)
 from scipy.stats import mode
 from skimage import io
 from skimage.filters import threshold_otsu, sobel
-from matplotlib import cm
+#from matplotlib import cm
 from PIL import Image
 
 
